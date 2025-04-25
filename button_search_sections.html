@@ -1,0 +1,157 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Search with Sections</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            margin: 0;
+        }
+        .search-container {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 10px 0;
+            z-index: 1;
+        }
+        #searchInput {
+            padding: 8px;
+            width: 300px;
+            font-size: 16px;
+        }
+        .section {
+            margin: 40px 0;
+            min-height: 300px;
+        }
+        .section h2 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 5px;
+        }
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button.highlight {
+            background-color: #ff9800;
+            transform: scale(1.05);
+            transition: all 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search buttons..." onkeyup="searchAndScroll(event)">
+    </div>
+
+    <div class="section" id="section1">
+        <h2>Section 1</h2>
+        <div class="button-container">
+            <button class="searchable" data-name="apple">Apple</button>
+            <button class="searchable" data-name="banana">Banana</button>
+            <button class="searchable" data-name="cherry">Cherry</button>
+        </div>
+    </div>
+
+    <div class="section" id="section2">
+        <h2>Section 2</h2>
+        <div class="button-container">
+            <button class="searchable" data-name="dragon">Dragon Fruit</button>
+            <button class="searchable" data-name="elderberry">Elderberry</button>
+            <button class="searchable" data-name="fig">Fig</button>
+        </div>
+    </div>
+
+    <div class="section" id="section3">
+        <h2>Section 3</h2>
+        <div class="button-container">
+            <button class="searchable" data-name="grape">Grape</button>
+            <button class="searchable" data-name="honeydew">Honeydew</button>
+            <button class="searchable" data-name="kiwi">Kiwi</button>
+            <button class="searchable" data-name="lemon">Lemon</button>
+        </div>
+    </div>
+
+    <script>
+        function searchAndScroll(event) {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const buttons = document.getElementsByClassName('searchable');
+            
+            // Remove existing highlights
+            for (let button of buttons) {
+                button.classList.remove('highlight');
+            }
+
+            // If Enter is pressed and there's input, scroll to first match
+            if (event.key === 'Enter' && input) {
+                for (let button of buttons) {
+                    const name = button.getAttribute('data-name').toLowerCase();
+                    if (name.includes(input)) {
+                        button.classList.add('highlight');
+                        button.scrollIntoView({ 
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                        break; // Scroll to first match only
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

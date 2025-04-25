@@ -1,0 +1,286 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Quiz - All Questions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        #quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        #timer {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            font-size: 18px;
+            color: #d32f2f;
+        }
+        #question-nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        .nav-btn {
+            width: 30px;
+            height: 30px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            line-height: 26px;
+        }
+        .nav-btn.answered {
+            background: #4CAF50;
+            color: white;
+        }
+        .question {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .options label {
+            display: block;
+            margin: 10px 0;
+        }
+        .match-table {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .match-table select {
+            width: 100%;
+            padding: 5px;
+        }
+        #submit-btn {
+            padding: 10px 20px;
+            background: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #results {
+            display: none;
+        }
+        .result-item {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .correct { color: #2e7d32; }
+        .incorrect { color: #d32f2f; }
+    </style>
+</head>
+<body>
+    <div id="quiz-container">
+        <div id="timer">Time Left: 10:00</div>
+        <div id="question-nav"></div>
+        <div id="questions"></div>
+        <button id="submit-btn" onclick="submitQuiz()">Submit Quiz</button>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const quizData = [
+            { type: 'mcq', question: 'What is the capital of France?', options: ['London', 'Paris', 'Berlin', 'Madrid'], answer: 'Paris', explanation: 'Paris is the capital city of France.' },
+            { type: 'tf', question: 'The Earth is flat.', answer: 'False', explanation: 'The Earth is an oblate spheroid, not flat.' },
+            { 
+                type: 'match', 
+                question: 'Match the animals to their habitats:', 
+                pairs: { 
+                    'Lion': 'Savanna', 
+                    'Penguin': 'Antarctica', 
+                    'Shark': 'Ocean', 
+                    'Bear': 'Forest', 
+                    'Whale': 'Sea' 
+                }, 
+                explanation: 'Animals are matched to their natural habitats.' 
+            },
+            { type: 'mcq', question: 'Which planet is known as the Red Planet?', options: ['Venus', 'Mars', 'Jupiter', 'Saturn'], answer: 'Mars', explanation: 'Mars is called the Red Planet due to its reddish appearance.' },
+            { type: 'tf', question: 'Water boils at 100°C.', answer: 'True', explanation: 'At standard atmospheric pressure, water boils at 100°C.' }
+        ];
+
+        let shuffledQuestions = [];
+        let answers = {};
+        let timeLeft = 600; // 10 minutes in seconds
+
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function startTimer() {
+            const timer = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                document.getElementById('timer').textContent = `Time Left: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    submitQuiz();
+                }
+            }, 1000);
+        }
+
+        function initQuiz() {
+            shuffledQuestions = shuffle([...quizData]);
+            const nav = document.getElementById('question-nav');
+            const questionsDiv = document.getElementById('questions');
+
+            shuffledQuestions.forEach((q, i) => {
+                // Create navigation button
+                const btn = document.createElement('button');
+                btn.className = 'nav-btn';
+                btn.textContent = i + 1;
+                btn.onclick = () => {
+                    document.getElementById(`q${i}`).scrollIntoView({ behavior: 'smooth' });
+                };
+                nav.appendChild(btn);
+
+                // Create question
+                const qDiv = document.createElement('div');
+                qDiv.className = 'question';
+                qDiv.id = `q${i}`;
+                qDiv.innerHTML = `<h3>Question ${i + 1}: ${q.question}</h3>`;
+
+                if (q.type === 'mcq') {
+                    const optionsDiv = document.createElement('div');
+                    optionsDiv.className = 'options';
+                    q.options.forEach(opt => {
+                        optionsDiv.innerHTML += `
+                            <label><input type="radio" name="q${i}" value="${opt}" onchange="recordAnswer(${i}, this.value)"> ${opt}</label>
+                        `;
+                    });
+                    qDiv.appendChild(optionsDiv);
+                } else if (q.type === 'tf') {
+                    qDiv.innerHTML += `
+                        <label><input type="radio" name="q${i}" value="True" onchange="recordAnswer(${i}, this.value)"> True</label>
+                        <label><input type="radio" name="q${i}" value="False" onchange="recordAnswer(${i}, this.value)"> False</label>
+                    `;
+                } else if (q.type === 'match') {
+                    const matchDiv = document.createElement('div');
+                    matchDiv.className = 'match-table';
+                    const left = Object.keys(q.pairs);
+                    const right = shuffle(Object.values(q.pairs));
+                    left.forEach((item, idx) => {
+                        matchDiv.innerHTML += `
+                            <span>${item}</span>
+                            <select onchange="recordMatchAnswer(${i}, '${item}', this.value)">
+                                <option value="">Select match</option>
+                                ${right.map(r => `<option value="${r}">${r}</option>`).join('')}
+                            </select>
+                        `;
+                    });
+                    qDiv.appendChild(matchDiv);
+                }
+                questionsDiv.appendChild(qDiv);
+            });
+
+            startTimer();
+        }
+
+        function recordAnswer(index, value) {
+            answers[index] = value;
+            document.querySelectorAll('.nav-btn')[index].classList.add('answered');
+        }
+
+        function recordMatchAnswer(index, item, value) {
+            if (!answers[index]) answers[index] = {};
+            answers[index][item] = value;
+            if (Object.keys(answers[index]).length === Object.keys(shuffledQuestions[index].pairs).length) {
+                document.querySelectorAll('.nav-btn')[index].classList.add('answered');
+            }
+        }
+
+        function submitQuiz() {
+            clearInterval(timeLeft);
+            let score = 0;
+            let resultsHTML = '<h2>Quiz Results</h2>';
+
+            shuffledQuestions.forEach((q, i) => {
+                let userAnswer = answers[i];
+                let isCorrect = false;
+
+                if (q.type === 'match') {
+                    isCorrect = userAnswer && Object.entries(q.pairs).every(([k, v]) => userAnswer[k] === v);
+                } else {
+                    isCorrect = userAnswer === q.answer;
+                }
+
+                if (isCorrect) score++;
+                resultsHTML += `
+                    <div class="result-item">
+                        <h3>Question ${i + 1}: ${q.question}</h3>
+                        <p>Your Answer: ${JSON.stringify(userAnswer)} - <span class="${isCorrect ? 'correct' : 'incorrect'}">${isCorrect ? 'Correct' : 'Incorrect'}</span></p>
+                        ${!isCorrect ? `<p>Correct Answer: ${q.type === 'match' ? JSON.stringify(q.pairs) : q.answer}</p>` : ''}
+                        <p>Explanation: ${q.explanation}</p>
+                    </div>
+                `;
+            });
+
+            resultsHTML += `<h3>Score: ${score}/${shuffledQuestions.length} (${Math.round((score / shuffledQuestions.length) * 100)}%)</h3>`;
+            document.getElementById('questions').style.display = 'none';
+            document.getElementById('submit-btn').style.display = 'none';
+            document.getElementById('results').innerHTML = resultsHTML;
+            document.getElementById('results').style.display = 'block';
+        }
+
+        window.onload = initQuiz;
+    </script>
+</body>
+</html>
