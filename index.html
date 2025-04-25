@@ -105,9 +105,13 @@ https://templatemo.com/tm-590-topic-listing
                                         
                                     </span>
 
-                                    <input name="keyword" type="search" class="form-control" id="keyword" placeholder="Design, Code, Marketing, Finance ..." aria-label="Search">
 
-                                    <button type="submit" class="form-control">Search</button>
+                                    <input type="text" id="searchInput" placeholder="Enter div name (e.g., Apple)">
+                                    <button onclick="searchAndScroll()">Search</button>
+
+                                    <!-- <input name="keyword" type="text" class="form-control" id="keyword" placeholder="Design, Code, Marketing, Finance ..." aria-label="Search" onkeyup="searchAndScroll(event)">
+
+                                    <button type="submit" class="form-control">Search</button> -->
                                 </div>
                             </form>
                         </div>
@@ -122,7 +126,7 @@ https://templatemo.com/tm-590-topic-listing
                     <div class="row justify-content-center">
 
                         <div class="col-lg-4 col-12 mb-4 mb-lg-0">
-                            <div class="custom-block bg-white shadow-lg">
+                            <div class="custom-block bg-white shadow-lg" data-name="apple">
                                 <a href="topics-detail.html">
                                     <div class="d-flex">
                                         <div>
@@ -183,47 +187,6 @@ https://templatemo.com/tm-590-topic-listing
 
 
 
-                        <div class="col-lg-6 col-12">
-                            <div class="custom-block custom-block-overlay">
-                                <div class="d-flex flex-column h-100">
-                                    <img src="images/businesswoman-using-tablet-analysis.jpg" class="custom-block-image img-fluid" alt="">
-
-                                    <div class="custom-block-overlay-text d-flex">
-                                        <div>
-                                            <h5 class="text-white mb-2">Finance</h5>
-
-                                            <p class="text-white">Topic Listing Template includes homepage, listing page, detail page, and contact page. You can feel free to edit and adapt for your CMS requirements.</p>
-
-                                            <a href="topics-detail.html" class="btn custom-btn mt-2 mt-lg-3">Learn More</a>
-                                        </div>
-
-                                        <span class="badge bg-finance rounded-pill ms-auto">25</span>
-                                    </div>
-
-                                    <div class="social-share d-flex">
-                                        <p class="text-white me-4">Share:</p>
-
-                                        <ul class="social-icon">
-                                            <li class="social-icon-item">
-                                                <a href="#" class="social-icon-link bi-twitter"></a>
-                                            </li>
-
-                                            <li class="social-icon-item">
-                                                <a href="#" class="social-icon-link bi-facebook"></a>
-                                            </li>
-
-                                            <li class="social-icon-item">
-                                                <a href="#" class="social-icon-link bi-pinterest"></a>
-                                            </li>
-                                        </ul>
-
-                                        <a href="#" class="custom-icon bi-bookmark ms-auto"></a>
-                                    </div>
-
-                                    <div class="section-overlay"></div>
-                                </div>
-                            </div>
-                        </div>
 
 
                     </div>
@@ -276,7 +239,7 @@ https://templatemo.com/tm-590-topic-listing
                                 <div class="tab-pane fade show active" id="design-tab-pane" role="tabpanel" aria-labelledby="design-tab" tabindex="0">
                                     <div class="row">
                                         <div class="col-lg-4 col-md-6 col-12 mb-4 mb-lg-0">
-                                            <div class="custom-block bg-white shadow-lg">
+                                            <div class="custom-block bg-white shadow-lg" data-name="web">
                                                 <a href="topics-detail.html">
                                                     <div class="d-flex">
                                                         <div>
@@ -293,8 +256,30 @@ https://templatemo.com/tm-590-topic-listing
                                             </div>
                                         </div>
 
+
                                         <div class="col-lg-4 col-md-6 col-12 mb-4 mb-lg-0">
-                                            <div class="custom-block bg-white shadow-lg">
+                                            <div class="custom-block bg-white shadow-lg" data-name="love">
+                                                <a href="topics-detail.html">
+                                                    <div class="d-flex">
+                                                        <div>
+                                                            <h5 class="mb-2">Web Design</h5>
+
+                                                            <p class="mb-0">Topic Listing Template based on Bootstrap 5</p>
+                                                        </div>
+
+                                                        <span class="badge bg-design rounded-pill ms-auto">14</span>
+                                                    </div>
+
+                                                    <img src="images/topics/undraw_Remote_design_team_re_urdx.png" class="custom-block-image img-fluid" alt="">
+                                                </a>
+                                            </div>
+                                        </div>
+
+
+
+
+                                        <div class="col-lg-4 col-md-6 col-12 mb-4 mb-lg-0">
+                                            <div class="custom-block bg-white shadow-lg" data-name="alo">
                                                 <a href="topics-detail.html">
                                                     <div class="d-flex">
                                                         <div>
@@ -312,7 +297,7 @@ https://templatemo.com/tm-590-topic-listing
                                         </div>
 
                                         <div class="col-lg-4 col-md-6 col-12">
-                                            <div class="custom-block bg-white shadow-lg">
+                                            <div class="custom-block bg-white shadow-lg" data-name="kalo">
                                                 <a href="topics-detail.html">
                                                     <div class="d-flex">
                                                         <div>
@@ -686,61 +671,59 @@ https://templatemo.com/tm-590-topic-listing
                 <div class="container">
                     <div class="row">
 
-                        <div class="col-lg-12 col-12 text-center">
-                            <h2 class="mb-5">Get in touch</h2>
+                        
+                        <div class="col-lg-12 col-12">
+                            <h3 class="mb-4 pb-2">We'd love to hear from you</h3>
                         </div>
 
-                        <div class="col-lg-5 col-12 mb-4 mb-lg-0">
+                        <div class="col-lg-6 col-12">
+                            <form action="https://formsubmit.co/341da597070d8ab80072a2536b983469" method="post" class="custom-form contact-form" role="form">
+                                <div class="row">
+                                    <div class="col-lg-6 col-md-6 col-12">
+                                        <div class="form-floating">
+                                            <input type="text" name="name" id="name" class="form-control" placeholder="Name" required="">
+                                            
+                                            <label for="floatingInput">Name</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-6 col-md-6 col-12"> 
+                                        <div class="form-floating">
+                                            <input type="email" name="email" id="email" pattern="[^ @]*@[^ @]*" class="form-control" placeholder="Email address" required="">
+                                            
+                                            <label for="floatingInput">Email address</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-12 col-12">
+                                        <div class="form-floating">
+                                            <input type="text" name="subject" id="name" class="form-control" placeholder="Name" required="">
+                                            
+                                            <label for="floatingInput">Subject</label>
+                                        </div>
+
+                                        <div class="form-floating">
+                                            <textarea class="form-control" id="message" name="message" placeholder="Tell me about the project"></textarea>
+                                            
+                                            <label for="floatingTextarea">Tell me about the project</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-4 col-12 ms-auto">
+                                        <button type="submit" class="form-control">Submit</button>
+                                    </div>
+
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-lg-5 col-12 mx-auto mt-5 mt-lg-0">
                             <iframe class="google-map" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2595.065641062665!2d-122.4230416990949!3d37.80335401520422!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80858127459fabad%3A0x808ba520e5e9edb7!2sFrancisco%20Park!5e1!3m2!1sen!2sth!4v1684340239744!5m2!1sen!2sth" width="100%" height="250" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                        </div>
 
-                        <div class="col-lg-3 col-md-6 col-12 mb-3 mb-lg- mb-md-0 ms-auto">
-                            <h4 class="mb-3">Head office</h4>
+                            <h5 class="mt-4 mb-2">Topic Listing Center</h5>
 
                             <p>Bay St &amp;, Larkin St, San Francisco, CA 94109, United States</p>
-
-                            <hr>
-
-                            <p class="d-flex align-items-center mb-1">
-                                <span class="me-2">Phone</span>
-
-                                <a href="tel: 305-240-9671" class="site-footer-link">
-                                    305-240-9671
-                                </a>
-                            </p>
-
-                            <p class="d-flex align-items-center">
-                                <span class="me-2">Email</span>
-
-                                <a href="mailto:info@company.com" class="site-footer-link">
-                                    info@company.com
-                                </a>
-                            </p>
                         </div>
 
-                        <div class="col-lg-3 col-md-6 col-12 mx-auto">
-                            <h4 class="mb-3">Dubai office</h4>
-
-                            <p>Burj Park, Downtown Dubai, United Arab Emirates</p>
-
-                            <hr>
-
-                            <p class="d-flex align-items-center mb-1">
-                                <span class="me-2">Phone</span>
-
-                                <a href="tel: 110-220-3400" class="site-footer-link">
-                                    110-220-3400
-                                </a>
-                            </p>
-
-                            <p class="d-flex align-items-center">
-                                <span class="me-2">Email</span>
-
-                                <a href="mailto:info@company.com" class="site-footer-link">
-                                    info@company.com
-                                </a>
-                            </p>
-                        </div>
 
                     </div>
                 </div>
@@ -807,6 +790,7 @@ https://templatemo.com/tm-590-topic-listing
         <script src="js/jquery.sticky.js"></script>
         <script src="js/click-scroll.js"></script>
         <script src="js/custom.js"></script>
+        <script src="search.js"></script>
 
     </body>
 </html>
